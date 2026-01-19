@@ -306,23 +306,6 @@ systemctl enable kubelet
 
 ---
 
-### Test scheduling
-
-```bash
-kubectl run nginx --image=nginx
-kubectl get pods -o wide
-```
-
----
-
-### Optional: Remove control-plane taint
-
-```bash
-kubectl taint nodes k8s-master node-role.kubernetes.io/control-plane-
-```
-
----
-
 # 🔹 STEP 8 – CLUSTER HEALTH CHECKS 
 
 ```bash
@@ -345,5 +328,140 @@ kubectl get pods -A
 | API unreachable              | wrong advertise address    |
 
 ---
+
+
+# Test scheduling
+
+---
+
+# 📄 File: `nginx-deploy.yaml`
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.25
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+spec:
+  type: NodePort
+  selector:
+    app: nginx
+  ports:
+  - port: 80          # Service port (inside cluster)
+    targetPort: 80    # Container port
+    nodePort: 30080   # External access port
+```
+
+---
+
+# 🚀 Deploy It
+
+On **master node**:
+
+```bash
+kubectl apply -f nginx-deploy.yaml
+```
+
+---
+
+# 🔍 Verify Deployment
+
+```bash
+kubectl get deployments
+kubectl get pods -o wide
+kubectl get svc nginx-service
+```
+
+Expected:
+
+* **2 nginx pods**
+* Service type: `NodePort`
+* NodePort: `30080`
+
+---
+
+# 🌍 Access from Windows (Outside Cluster)
+
+Use **ANY node IP** (recommended: master):
+
+```text
+http://192.168.56.10:30080
+```
+
+You should see:
+
+```
+Welcome to nginx!
+```
+
+This proves:
+
+* Pod networking works
+* Service routing works
+* kube-proxy is working
+* containerd + CNI are correct
+
+---
+
+# 🧠 What’s Happening Behind the Scenes (Quick)
+
+1. Browser → Node IP : 30080
+2. kube-proxy intercepts traffic
+3. Routes to Service (`ClusterIP`)
+4. Load-balances across 2 pods
+5. Pod responds with NGINX page
+
+---
+
+# 🧪 Test Load Balancing (Optional)
+
+Run multiple refreshes:
+
+```bash
+kubectl logs -l app=nginx
+```
+
+You’ll see requests hitting **both pods**.
+
+---
+
+# 🧹 Cleanup (When Done)
+
+```bash
+kubectl delete -f nginx-deploy.yaml
+```
+
+---
+
+
+
 
 
