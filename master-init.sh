@@ -6,7 +6,6 @@ set -euo pipefail
 # CONFIGURABLE VARIABLES
 ##############################
 
-K8S_VERSION="1.33"
 MASTER_IP="192.168.56.10"
 POD_CIDR="192.168.0.0/16"
 CNI="calico"
@@ -42,7 +41,6 @@ fi
 echo "[1/6] Initializing control plane..."
 
 sudo kubeadm init \
-  --kubernetes-version="v${K8S_VERSION}" \
   --apiserver-advertise-address="${MASTER_IP}" \
   --pod-network-cidr="${POD_CIDR}"
 
