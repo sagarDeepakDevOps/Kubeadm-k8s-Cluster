@@ -173,6 +173,11 @@ Verify:
 kubeadm version
 ```
 
+### 4. Exit Root User (switch to ubuntu)
+```bash
+exit
+```
+
 ---
 
 # 🔹 STEP 4 – INITIALIZE CONTROL PLANE (MASTER ONLY)
