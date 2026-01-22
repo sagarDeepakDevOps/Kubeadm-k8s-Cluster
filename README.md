@@ -289,17 +289,7 @@ k8s-worker2  Ready
 
 ---
 
-# 🔹 STEP 7 – POST-INSTALL HARDENING (SENIOR LEVEL)
-
-### Enable kubelet at boot
-
-```bash
-systemctl enable kubelet
-```
-
----
-
-# 🔹 STEP 8 – CLUSTER HEALTH CHECKS 
+# 🔹 STEP 7 – CLUSTER HEALTH CHECKS 
 
 ```bash
 kubectl get componentstatuses
